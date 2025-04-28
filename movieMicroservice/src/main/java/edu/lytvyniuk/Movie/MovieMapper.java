@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 @Mapper(componentModel = "spring")
 public interface MovieMapper {
 
-
     @Mapping(source = "movieGenres", target = "genres", qualifiedByName = "movieGenresToDTOs")
     MovieDTO toDTO(Movie movie);
 
@@ -38,9 +37,8 @@ public interface MovieMapper {
     @Mapping(target = "movieGenres", ignore = true)
     void updateEntityFromDTO(MovieDTO movieDTO, @MappingTarget Movie movie);
 
-
     @Named("movieGenresToDTOs")
-    default List<GenreDTO> movieGenresToDTOs(Set<MovieGenre> movieGenres) {
+    default List<GenreDTO> movieGenresToDTOs(List<MovieGenre> movieGenres) {
         if (movieGenres == null) {
             return List.of();
         }

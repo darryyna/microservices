@@ -29,7 +29,7 @@ public class MovieService {
     private final MovieRepository movieRepository;
     private final RestTemplate restTemplate;
 
-    @Value("http://localhost:9993")
+    @Value("${ratings.service.url}")
     private String ratingsServiceUrl;
 
 

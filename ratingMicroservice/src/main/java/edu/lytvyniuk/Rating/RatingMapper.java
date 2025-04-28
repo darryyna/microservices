@@ -18,8 +18,6 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface RatingMapper {
 
-    @Mapping(target = "username", ignore = true)
-    @Mapping(target = "movieTitle", ignore = true)
     RatingDTO toDTO(Rating rating);
 
     @Mapping(target = "ratingId", ignore = true)
@@ -31,7 +29,6 @@ public interface RatingMapper {
     @Mapping(target = "userId", ignore = true)
     @Mapping(target = "movieId", ignore = true)
     void updateEntityFromDTO(RatingDTO ratingDTO, @MappingTarget Rating rating);
-
 
     List<RatingDTO> toDTOList(List<Rating> ratings);
 }

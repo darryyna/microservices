@@ -27,6 +27,11 @@ public class GenreService {
         return genreRepository.findAll();
     }
 
+    public Genre findById(Long id) throws ResourceNotFoundException {
+        return genreRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Genre not found with id: " + id));
+    }
+
     public Genre findByName(String name) throws ResourceNotFoundException {
         if(genreRepository.findByName(name) == null) {
             throw new ResourceNotFoundException("Genre with name " + name + " not found");

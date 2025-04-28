@@ -15,8 +15,10 @@ import edu.lytvyniuk.customException.ResourceNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -36,8 +38,6 @@ public class MovieController {
         MovieDTO movieDTO = movieMapper.toDTO(movie);
         try {
             List<RatingDTO> ratings = movieService.getRatingsForMovie(movie.getMovieId());
-            System.out.println("Fetched " + ratings.size() + " ratings for movie " + movie.getMovieId());
-
         } catch (RuntimeException e) {
             System.err.println("Error fetching ratings for movie " + movie.getMovieId() + ": " + e.getMessage());
         }
@@ -49,13 +49,15 @@ public class MovieController {
     @GetMapping
     public ResponseEntity<List<MovieDTO>> getAllMovies() {
         List<Movie> movies = movieService.findAll();
+        List<Movie> safeMovies = new ArrayList<>(movies);
 
-        List<MovieDTO> movieDTOs = movies.stream()
+        List<MovieDTO> movieDTOs = safeMovies.stream()
                 .map(this::getMovieDTOWithDetails)
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(movieDTOs);
     }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<MovieDTO> getMovieById(@PathVariable(name = "id") Long id) {

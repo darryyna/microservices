@@ -11,7 +11,9 @@ import edu.lytvyniuk.Movie.MovieGenre.MovieGenre;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -32,6 +34,6 @@ public class Genre {
     private String description;
 
     @OneToMany(mappedBy = "genre")
-    private Set<MovieGenre> movieGenres = new HashSet<>();
+    private List<MovieGenre> movieGenres = new ArrayList<>();
 
 }

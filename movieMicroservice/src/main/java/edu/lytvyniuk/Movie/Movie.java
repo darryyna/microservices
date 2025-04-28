@@ -14,7 +14,9 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -44,7 +46,7 @@ public class Movie {
     @Column(name = "average_rating")
     private Double averageRating;
 
-    @OneToMany(mappedBy = "movie")
-    private Set<MovieGenre> movieGenres = new HashSet<>();
+    @OneToMany(mappedBy = "movie", fetch = FetchType.LAZY)
+    private List<MovieGenre> movieGenres = new ArrayList<>();
 
 }

@@ -18,8 +18,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
 @RestController
 @RequestMapping("/ratings")
 public class RatingController {
@@ -33,19 +31,16 @@ public class RatingController {
 
     @GetMapping
     public ResponseEntity<List<RatingDTO>> getAllRatings() {
-        List<Rating> ratings = ratingService.findAll();
-        List<RatingDTO> ratingDTOs = ratings.stream()
-                .map(ratingMapper::toDTO)
-                .collect(Collectors.toList());
+        List<RatingDTO> ratingDTOs = ratingService.findAllDTOs();
         return ResponseEntity.ok(ratingDTOs);
     }
 
-    @GetMapping("/{id}") // Додано ендпоінт для отримання рейтингу за ID
+    @GetMapping("/{id}")
     public ResponseEntity<RatingDTO> getRatingById(@PathVariable(name = "id") Long id) {
-        Optional<Rating> rating = ratingService.findById(id);
-        if (rating.isPresent()) {
-            RatingDTO ratingDTO = ratingMapper.toDTO(rating.get());
-            return ResponseEntity.ok(ratingDTO);
+        Optional<RatingDTO> ratingDTO = ratingService.findDTOById(id);
+
+        if (ratingDTO.isPresent()) {
+            return ResponseEntity.ok(ratingDTO.get());
         } else {
             return ResponseEntity.notFound().build();
         }
@@ -53,20 +48,16 @@ public class RatingController {
 
     @GetMapping("/movie/{movieId}")
     public ResponseEntity<List<RatingDTO>> getRatingsByMovieId(@PathVariable(name = "movieId") Long movieId) throws ResourceNotFoundException {
-        List<Rating> ratings = ratingService.findRatingsByMovieId(movieId);
-        List<RatingDTO> ratingDTOs = ratings.stream()
-                .map(ratingMapper::toDTO)
-                .collect(Collectors.toList());
+        List<RatingDTO> ratingDTOs = ratingService.findRatingDTOsByMovieId(movieId);
         return ResponseEntity.ok(ratingDTOs);
     }
-
 
     @PostMapping
     public ResponseEntity<RatingDTO> createRating(@Valid @RequestBody RatingDTO ratingDTO) throws DuplicateResourceException, ResourceNotFoundException {
         Rating rating = ratingMapper.toEntity(ratingDTO);
-        Rating createdRating = ratingService.createRating(rating, ratingDTO.getUsername(), ratingDTO.getMovieTitle());
 
-        RatingDTO createdRatingDTO = ratingMapper.toDTO(createdRating);
+        RatingDTO createdRatingDTO = ratingService.createRating(rating, ratingDTO.getUsername(), ratingDTO.getMovieTitle());
+
         return new ResponseEntity<>(createdRatingDTO, HttpStatus.CREATED);
     }
 

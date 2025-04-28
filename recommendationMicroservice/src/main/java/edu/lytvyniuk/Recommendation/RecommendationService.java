@@ -30,10 +30,10 @@ public class RecommendationService {
     private final RecommendationRepository recommendationRepository;
     private final RestTemplate restTemplate;
 
-    @Value("http://localhost:9991")
+    @Value("${user.service.url}")
     private String userServiceUrl;
 
-    @Value("http://localhost:9992")
+    @Value("${movie.service.url}")
     private String movieServiceUrl;
 
     public RecommendationService(RecommendationRepository recommendationRepository, RestTemplate restTemplate) {

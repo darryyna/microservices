@@ -18,7 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 @Data
 public class MovieDTO {
-    private Long movieId; // Додано ID
+    private Long movieId;
     @NotEmpty
     private String title;
     @NotNull
@@ -26,11 +26,6 @@ public class MovieDTO {
     private LocalDate releaseDate;
     @NotNull
     private Integer duration;
-    // averageRating може бути в DTO, але його отримання/оновлення - окрема логіка
     private Double averageRating;
-    // Залишаємо, якщо GenreDTO знаходиться у common-dto або тут
     private List<GenreDTO> genres;
-
-    // Видаляємо зв'язок з RatingDTO
-    // private List<RatingDTO> ratings;
 }

@@ -36,9 +36,17 @@ public class GenreController {
         return ResponseEntity.ok(genreMapper.toDTOList(genreService.findAll()));
     }
 
-    @GetMapping("/{name}")
+    @GetMapping("name/{name}")
     public ResponseEntity<GenreDTO> getGenreByName(@PathVariable(name = "name") String name) throws ResourceNotFoundException {
         Genre genre = genreService.findByName(name);
+        return genre != null ?
+                ResponseEntity.ok(genreMapper.toDTO(genre)) :
+                ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<GenreDTO> getGenreById(@PathVariable(name = "id") Long id) throws ResourceNotFoundException {
+        Genre genre = genreService.findById(id);
         return genre != null ?
                 ResponseEntity.ok(genreMapper.toDTO(genre)) :
                 ResponseEntity.status(HttpStatus.NOT_FOUND).build();
