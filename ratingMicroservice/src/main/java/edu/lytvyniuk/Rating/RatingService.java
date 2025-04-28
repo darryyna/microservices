@@ -23,12 +23,12 @@ import java.util.Optional;
 @Service
 public class RatingService {
     private final RatingRepository ratingRepository;
-    private final RestTemplate restTemplate; // Для викликів до інших сервісів
+    private final RestTemplate restTemplate;
 
-    @Value("http://localhost:9991") // URL user-microservice
+    @Value("http://localhost:9991")
     private String userServiceUrl;
 
-    @Value("http://localhost:9992") // URL movie-microservice
+    @Value("http://localhost:9992")
     private String movieServiceUrl;
 
     public RatingService(RatingRepository ratingRepository, RestTemplate restTemplate) {
@@ -57,13 +57,12 @@ public class RatingService {
 
 
         } catch (Exception e) {
-            // Обробка помилок зв'язку або інших помилок
             throw new RuntimeException("Error calling user service: " + e.getMessage(), e);
         }
     }
 
     private Long getMovieIdByTitle(String movieTitle) throws ResourceNotFoundException {
-        String url = movieServiceUrl + "/movies/title/" + movieTitle; // Припустимо такий ендпоінт
+        String url = movieServiceUrl + "/movies/title/" + movieTitle;
         try {
             try {
                 MovieDTO movieDTO = restTemplate.getForObject(url, MovieDTO.class);
@@ -82,20 +81,16 @@ public class RatingService {
     }
 
     public Rating createRating(Rating rating, String username, String movieTitle) throws DuplicateResourceException, ResourceNotFoundException {
-        // Отримуємо ID користувача та фільму, викликаючи інші сервіси
         Long userId = getUserIdByUsername(username);
         Long movieId = getMovieIdByTitle(movieTitle);
 
-        // Перевіряємо, чи існує вже рейтинг від цього користувача для цього фільму
         if (ratingRepository.existsByUserIdAndMovieId(userId, movieId)) {
             throw new DuplicateResourceException("User has already rated this movie.");
         }
 
-        // Встановлюємо отримані ID в сутність Rating
         rating.setUserId(userId);
         rating.setMovieId(movieId);
 
-        // Зберігаємо рейтинг у власній базі даних
         return ratingRepository.save(rating);
     }
 
@@ -104,12 +99,10 @@ public class RatingService {
         return ratingRepository.findByMovieId(movieId);
     }
 
-    // Можливо, додайте метод для отримання рейтингу за ID
     public Optional<Rating> findById(Long id) {
         return ratingRepository.findById(id);
     }
 
-    // Можливо, додайте метод для видалення рейтингу за ID
     public void deleteById(Long id) throws ResourceNotFoundException {
         if (!ratingRepository.existsById(id)) {
             throw new ResourceNotFoundException("Rating with id " + id + " not found");

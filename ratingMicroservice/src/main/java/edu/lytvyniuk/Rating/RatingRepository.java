@@ -14,9 +14,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface RatingRepository extends JpaRepository<Rating, Long> {
-    List<Rating> findByMovieId(Long movieId); // Змінено з findRatingsByMovie_MovieId
+    List<Rating> findByMovieId(Long movieId);
 
-    boolean existsByUserIdAndMovieId(Long userId, Long movieId); // Змінено з existsByUserAndMovie
+    boolean existsByUserIdAndMovieId(Long userId, Long movieId);
 
     Optional<Rating> findByUserIdAndMovieId(Long userId, Long movieId);
 

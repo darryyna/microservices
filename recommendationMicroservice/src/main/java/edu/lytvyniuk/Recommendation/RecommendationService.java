@@ -28,12 +28,12 @@ import java.util.Optional;
 @Service
 public class RecommendationService {
     private final RecommendationRepository recommendationRepository;
-    private final RestTemplate restTemplate; // Для викликів до інших сервісів
+    private final RestTemplate restTemplate;
 
-    @Value("http://localhost:9991") // URL user-microservice
+    @Value("http://localhost:9991")
     private String userServiceUrl;
 
-    @Value("http://localhost:9992") // URL movie-microservice
+    @Value("http://localhost:9992")
     private String movieServiceUrl;
 
     public RecommendationService(RecommendationRepository recommendationRepository, RestTemplate restTemplate) {
@@ -41,7 +41,6 @@ public class RecommendationService {
         this.restTemplate = restTemplate;
     }
 
-    // Метод для отримання User ID за username з user-microservice (аналогічно PreferenceService)
     private Long getUserIdByUsername(String username) throws ResourceNotFoundException {
         String url = userServiceUrl + "/users/username/" + username;
         try {
@@ -58,12 +57,9 @@ public class RecommendationService {
         }
     }
 
-    // Метод для отримання Movie ID за title з movie-microservice (аналогічно RatingService)
     private Long getMovieIdByTitle(String movieTitle) throws ResourceNotFoundException {
-        String url = movieServiceUrl + "/movies/title/" + movieTitle; // Припустимо такий ендпоінт в movie-service
+        String url = movieServiceUrl + "/movies/title/" + movieTitle;
         try {
-            // Припускаємо, movie-service повертає список MovieDTO або один MovieDTO
-            // Якщо повертає список:
             ResponseEntity<List<MovieDTO>> response = restTemplate.exchange(
                     url,
                     HttpMethod.GET,
@@ -72,18 +68,10 @@ public class RecommendationService {
             );
             List<MovieDTO> movies = response.getBody();
             if (response.getStatusCode().is2xxSuccessful() && movies != null && !movies.isEmpty() && movies.get(0).getMovieId() != null) {
-                // Припускаємо, що шукаємо перший фільм з такою назвою, якщо їх кілька
                 return movies.get(0).getMovieId();
             } else {
                 throw new ResourceNotFoundException("Movie ID not found in response for title: " + movieTitle);
             }
-            // Якщо повертає один MovieDTO:
-            // ResponseEntity<MovieDTO> response = restTemplate.getForEntity(url, MovieDTO.class);
-            // if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null && response.getBody().getMovieId() != null) {
-            //     return response.getBody().getMovieId();
-            // } else {
-            //     throw new ResourceNotFoundException("Movie ID not found in response for title: " + movieTitle);
-            // }
 
         } catch (HttpClientErrorException.NotFound e) {
             throw new ResourceNotFoundException("Movie not found with title: " + movieTitle);
@@ -93,50 +81,36 @@ public class RecommendationService {
     }
 
 
-    // Метод для отримання рекомендацій за ID користувача
     public List<Recommendation> findByUserId(Long userId) throws ResourceNotFoundException {
-        // Можливо, варто перевірити існування користувача, викликавши user-service (як у PreferenceService)
-
         List<Recommendation> recommendations = recommendationRepository.findByUserId(userId);
         if (recommendations.isEmpty()) {
-            // Повертаємо порожній список, якщо немає рекомендацій
-            return List.of();
-            // Або кидаємо ResourceNotFoundException("Recommendation not found for user with id: " + userId);
+            throw new ResourceNotFoundException("Recommendation not found for user with id: " + userId);
         }
         return recommendations;
     }
 
-    // Метод для отримання однієї рекомендації за ID
     public Optional<Recommendation> findById(Long id) {
         return recommendationRepository.findById(id);
     }
 
 
-    @Transactional
     public Recommendation createRecommendation(RecommendationDTO recommendationDTO) throws ResourceNotFoundException, DuplicateResourceException {
-        // 1. Отримуємо ID користувача та фільму, викликаючи інші сервіси
         Long userId = getUserIdByUsername(recommendationDTO.getUsername());
         Long movieId = getMovieIdByTitle(recommendationDTO.getMovieTitle());
 
-        // 2. Перевіряємо, чи існує вже рекомендація для цієї пари користувач-фільм (якщо є UniqueConstraint)
         if (recommendationRepository.existsByUserIdAndMovieId(userId, movieId)) {
             throw new DuplicateResourceException("Recommendation for user '" + recommendationDTO.getUsername() + "' and movie '" + recommendationDTO.getMovieTitle() + "' already exists.");
         }
 
-
-        // 3. Створюємо сутність Recommendation
         Recommendation recommendation = new Recommendation();
         recommendation.setUserId(userId);
         recommendation.setMovieId(movieId);
         recommendation.setRecommendationScore(recommendationDTO.getRecommendationScore());
-        recommendation.setIsViewed(recommendationDTO.getIsViewed()); // Встановлюємо з DTO, або залишити дефолтне значення
-
-        // 4. Зберігаємо рекомендацію
+        recommendation.setIsViewed(recommendationDTO.getIsViewed());
         return recommendationRepository.save(recommendation);
     }
 
-    // Можливо, метод для оновлення рекомендації (наприклад, відзначити як переглянуту)
-    @Transactional
+
     public Recommendation updateRecommendation(Long id, RecommendationDTO recommendationDTO) throws ResourceNotFoundException {
         Optional<Recommendation> existingRecommendationOpt = recommendationRepository.findById(id);
         if (existingRecommendationOpt.isEmpty()) {
@@ -144,18 +118,12 @@ public class RecommendationService {
         }
         Recommendation existingRecommendation = existingRecommendationOpt.get();
 
-        // Оновлюємо тільки ті поля, які можна змінювати (наприклад, isViewed, recommendationScore)
         existingRecommendation.setRecommendationScore(recommendationDTO.getRecommendationScore());
         existingRecommendation.setIsViewed(recommendationDTO.getIsViewed());
-
-        // Користувача і фільм зазвичай не змінюють при оновленні рекомендації за її ID.
-        // Якщо потрібно оновити за user_id та movie_id, логіка буде іншою.
-
         return recommendationRepository.save(existingRecommendation);
     }
 
 
-    @Transactional
     public void deleteById(Long id) throws ResourceNotFoundException {
         if (!recommendationRepository.existsById(id)) {
             throw new ResourceNotFoundException("Recommendation with id " + id + " not found");
@@ -163,13 +131,9 @@ public class RecommendationService {
         recommendationRepository.deleteById(id);
     }
 
-
-    // Допоміжний метод для створення DTO з Entity, отримуючи username та movieTitle
     public RecommendationDTO toDTO(Recommendation recommendation) {
-        // Отримуємо username з user-service за recommendation.getUserId()
         String username;
         try {
-            // Припускаємо, user-service має ендпоінт /users/{userId} і повертає UserDTO
             ResponseEntity<UserDTO> userResponse = restTemplate.getForEntity(userServiceUrl + "/users/" + recommendation.getUserId(), UserDTO.class);
             username = userResponse.getStatusCode().is2xxSuccessful() && userResponse.getBody() != null ? userResponse.getBody().getUsername() : "Unknown User";
         } catch (Exception e) {
@@ -177,10 +141,8 @@ public class RecommendationService {
             username = "Error Fetching User";
         }
 
-        // Отримуємо movieTitle з movie-service за recommendation.getMovieId()
         String movieTitle;
         try {
-            // Припускаємо, movie-service має ендпоінт /movies/{movieId} і повертає MovieDTO
             ResponseEntity<MovieDTO> movieResponse = restTemplate.getForEntity(movieServiceUrl + "/movies/" + recommendation.getMovieId(), MovieDTO.class);
             movieTitle = movieResponse.getStatusCode().is2xxSuccessful() && movieResponse.getBody() != null ? movieResponse.getBody().getTitle() : "Unknown Movie";
         } catch (Exception e) {
@@ -188,7 +150,6 @@ public class RecommendationService {
             movieTitle = "Error Fetching Movie";
         }
 
-        // Створюємо та повертаємо RecommendationDTO
         RecommendationDTO dto = new RecommendationDTO();
         dto.setRecommendationId(recommendation.getRecommendationId());
         dto.setUsername(username);
@@ -199,10 +160,9 @@ public class RecommendationService {
         return dto;
     }
 
-    // Допоміжний метод для маппінгу списку Entity в список DTO
     public List<RecommendationDTO> toDTOList(List<Recommendation> recommendations) {
         return recommendations.stream()
-                .map(this::toDTO) // Використовуємо допоміжний метод для кожного елемента
+                .map(this::toDTO)
                 .toList();
     }
 }

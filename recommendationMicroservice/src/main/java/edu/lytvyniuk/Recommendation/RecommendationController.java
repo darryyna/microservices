@@ -23,11 +23,9 @@ import java.util.Optional;
 @RequestMapping("/recommendations")
 public class RecommendationController {
     private final RecommendationService recommendationService;
-    private final RecommendationMapper recommendationMapper;
 
-    public RecommendationController(RecommendationService recommendationService, RecommendationMapper recommendationMapper) {
+    public RecommendationController(RecommendationService recommendationService) {
         this.recommendationService = recommendationService;
-        this.recommendationMapper = recommendationMapper;
     }
 
     @GetMapping("/user/{userId}")
@@ -48,8 +46,7 @@ public class RecommendationController {
         Optional<Recommendation> recommendationOpt = recommendationService.findById(id);
         if (recommendationOpt.isPresent()) {
             Recommendation recommendation = recommendationOpt.get();
-            // Використовуємо сервіс для перетворення в DTO
-            RecommendationDTO recommendationDTO = recommendationService.toDTO(recommendation); // Або recommendationMapper.toDTO(recommendation);
+            RecommendationDTO recommendationDTO = recommendationService.toDTO(recommendation);
             return ResponseEntity.ok(recommendationDTO);
         } else {
             return ResponseEntity.notFound().build();
@@ -58,25 +55,18 @@ public class RecommendationController {
 
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED) // Повертаємо 201 Created
+    @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<RecommendationDTO> createRecommendation(@Valid @RequestBody RecommendationDTO recommendationDTO) throws ResourceNotFoundException, DuplicateResourceException {
-        // Сервіс приймає DTO, отримує з нього username і movieTitle, знаходить ID і зберігає.
         Recommendation createdRecommendation = recommendationService.createRecommendation(recommendationDTO);
-
-        // Використовуємо сервіс для перетворення збереженої Entity назад в DTO для відповіді
-        RecommendationDTO createdRecommendationDTO = recommendationService.toDTO(createdRecommendation); // Або recommendationMapper.toDTO(createdRecommendation);
+        RecommendationDTO createdRecommendationDTO = recommendationService.toDTO(createdRecommendation);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(createdRecommendationDTO);
     }
 
-    // Приклад ендпоінту для оновлення рекомендації (наприклад, відзначити як переглянуту)
     @PutMapping("/{id}")
     public ResponseEntity<RecommendationDTO> updateRecommendation(@PathVariable(name = "id") Long id, @Valid @RequestBody RecommendationDTO recommendationDTO) throws ResourceNotFoundException {
-        // Сервіс оновлює рекомендацію за ID, використовуючи дані з DTO
         Recommendation updatedRecommendation = recommendationService.updateRecommendation(id, recommendationDTO);
-
-        // Використовуємо сервіс для перетворення оновленої Entity в DTO для відповіді
-        RecommendationDTO updatedRecommendationDTO = recommendationService.toDTO(updatedRecommendation); // Або recommendationMapper.toDTO(updatedRecommendation);
+        RecommendationDTO updatedRecommendationDTO = recommendationService.toDTO(updatedRecommendation);
 
         return ResponseEntity.ok(updatedRecommendationDTO);
     }

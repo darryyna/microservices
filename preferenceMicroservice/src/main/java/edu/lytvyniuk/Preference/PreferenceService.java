@@ -29,7 +29,7 @@ public class PreferenceService {
     private final PreferenceRepository preferenceRepository;
     private final RestTemplate restTemplate; // Для викликів до інших сервісів
 
-    @Value("http://localhost:9991") // URL user-microservice
+    @Value("http://localhost:9991/") // URL user-microservice
     private String userServiceUrl;
 
     @Value("http://localhost:9992") // URL movie-microservice
@@ -105,7 +105,6 @@ public class PreferenceService {
     }
 
 
-    @Transactional
     public Preference createPreference(PreferenceDTO preferenceDTO) throws DuplicateResourceException, ResourceNotFoundException {
         // 1. Отримуємо ID користувача та жанру, викликаючи інші сервіси
         Long userId = getUserIdByUsername(preferenceDTO.getUsername());
@@ -130,7 +129,6 @@ public class PreferenceService {
     }
 
 
-    @Transactional
     public Preference updatePreference(Long id, PreferenceDTO preferenceDTO) throws ResourceNotFoundException {
         // 1. Знаходимо існуюче уподобання за ID
         Optional<Preference> existingPreferenceOpt = preferenceRepository.findById(id);
@@ -172,7 +170,6 @@ public class PreferenceService {
         return preferenceRepository.save(existingPreference);
     }
 
-    @Transactional
     public void deleteById(Long id) throws ResourceNotFoundException {
         if (!preferenceRepository.existsById(id)) {
             throw new ResourceNotFoundException("Preference with id " + id + " not found");

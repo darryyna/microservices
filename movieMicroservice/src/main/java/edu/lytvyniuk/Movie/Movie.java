@@ -42,24 +42,9 @@ public class Movie {
     private Integer duration;
 
     @Column(name = "average_rating")
-    private Double averageRating; // Зберігаємо, але його оновлення потребує взаємодії з rating-service
+    private Double averageRating;
 
-    // Залишаємо, якщо Genre та MovieGenre керуються movie-service
-    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true) // Додано cascade та orphanRemoval
+    @OneToMany(mappedBy = "movie")
     private Set<MovieGenre> movieGenres = new HashSet<>();
 
-    // Видаляємо зв'язок з Rating, оскільки Rating знаходиться в іншому сервісі
-    // @OneToMany(mappedBy = "movie")
-    // private Set<Rating> ratings = new HashSet<>();
-
-    // Допоміжні методи для управління колекцією MovieGenre (важливо при bidirectional зв'язках)
-    public void addMovieGenre(MovieGenre movieGenre) {
-        movieGenres.add(movieGenre);
-        movieGenre.setMovie(this);
-    }
-
-    public void removeMovieGenre(MovieGenre movieGenre) {
-        movieGenres.remove(movieGenre);
-        movieGenre.setMovie(null);
-    }
 }

@@ -18,22 +18,15 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface RatingMapper {
 
-    // Маппінг Entity -> DTO
-    // Не мапаємо username та movieTitle напряму, їх потрібно буде отримати окремо
-    // або в іншому шарі.
-    @Mapping(target = "username", ignore = true) // Ігноруємо, оскільки немає прямого User об'єкта
-    @Mapping(target = "movieTitle", ignore = true) // Ігноруємо, оскільки немає прямого Movie об'єкта
+    @Mapping(target = "username", ignore = true)
+    @Mapping(target = "movieTitle", ignore = true)
     RatingDTO toDTO(Rating rating);
 
-    // Маппінг DTO -> Entity
-    // score, comment, ratingDate мапаються напряму
-    // userId та movieId будуть встановлені в сервісі після отримання їх з інших сервісів
-    @Mapping(target = "ratingId", ignore = true) // ID генерується базою
-    @Mapping(target = "userId", ignore = true) // Встановлюється в сервісі
-    @Mapping(target = "movieId", ignore = true) // Встановлюється в сервісі
+    @Mapping(target = "ratingId", ignore = true)
+    @Mapping(target = "userId", ignore = true)
+    @Mapping(target = "movieId", ignore = true)
     Rating toEntity(RatingDTO ratingDTO);
 
-    // Якщо потрібно оновити Entity з DTO (без зміни ID користувача та фільму)
     @Mapping(target = "ratingId", ignore = true)
     @Mapping(target = "userId", ignore = true)
     @Mapping(target = "movieId", ignore = true)
@@ -41,7 +34,4 @@ public interface RatingMapper {
 
 
     List<RatingDTO> toDTOList(List<Rating> ratings);
-
-    // Методи findUserByUsername та findMovieByTitle більше не потрібні в маппері
-    // Вони винесені в сервіс з використанням RestTemplate.
 }
