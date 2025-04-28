@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/common-dto/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/common-dto/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/movieMicroservice/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/movieMicroservice/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/preferenceMicroservice/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/preferenceMicroservice/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/ratingMicroservice/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/ratingMicroservice/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/recommendationMicroservice/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/recommendationMicroservice/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/userMicroservice/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/userMicroservice/src/main/resources" charset="UTF-8" />
+  </component>
+</project>
