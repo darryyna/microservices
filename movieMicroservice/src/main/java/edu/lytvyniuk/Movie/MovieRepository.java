@@ -10,6 +10,7 @@ package edu.lytvyniuk.Movie;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -23,4 +24,7 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
     List<Movie> findByMinimumRating(Double minRating);
 
     boolean existsByTitleAndReleaseDate(String title, LocalDate releaseDate);
+
+    @Query("SELECT m.movieId, m.title FROM Movie m WHERE m.movieId IN :ids")
+    List<Object[]> findMovieIdAndTitleByIdIn(@Param("ids") List<Long> ids);
 }

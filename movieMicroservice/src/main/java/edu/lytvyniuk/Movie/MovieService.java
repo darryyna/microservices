@@ -8,7 +8,12 @@ package edu.lytvyniuk.Movie;
   @since 28.04.2025 - 13.42
 */
 
+import edu.lytvyniuk.DTOs.GenreDTO;
 import edu.lytvyniuk.DTOs.RatingDTO;
+import edu.lytvyniuk.Movie.Genre.Genre;
+import edu.lytvyniuk.Movie.Genre.GenreService;
+import edu.lytvyniuk.Movie.MovieGenre.MovieGenre;
+import edu.lytvyniuk.Movie.MovieGenre.MovieGenreService;
 import edu.lytvyniuk.customException.DuplicateResourceException;
 import edu.lytvyniuk.customException.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,26 +21,31 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional; // Важливо для управління транзакціями
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.client.HttpClientErrorException; // Для обробки 404 тощо
+import org.springframework.web.client.HttpClientErrorException;
 
-import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class MovieService {
     private final MovieRepository movieRepository;
+    private final GenreService genreService;
     private final RestTemplate restTemplate;
+    private final MovieGenreService movieGenreService;
 
     @Value("${ratings.service.url}")
     private String ratingsServiceUrl;
 
 
-    public MovieService(MovieRepository movieRepository, RestTemplate restTemplate) {
+    public MovieService(MovieRepository movieRepository, GenreService genreService, RestTemplate restTemplate, MovieGenreService movieGenreService) {
         this.movieRepository = movieRepository;
+        this.genreService = genreService;
         this.restTemplate = restTemplate;
+        this.movieGenreService = movieGenreService;
     }
 
     public List<Movie> findAll() {
@@ -72,12 +82,16 @@ public class MovieService {
         return movies;
     }
 
-    public Movie save(Movie movie) throws DuplicateResourceException {
+    public Movie save(Movie movie, List<GenreDTO> genres) throws DuplicateResourceException {
         if (movieRepository.existsByTitleAndReleaseDate(movie.getTitle(), movie.getReleaseDate())) {
             throw new DuplicateResourceException("Movie with title '" + movie.getTitle() +
                     "' and release date '" + movie.getReleaseDate() + "' already exists");
         }
-        return movieRepository.save(movie);
+
+        Movie savedMovie = movieRepository.save(movie);
+        movieGenreService.saveAllMovieGenres(savedMovie, genres);
+
+        return savedMovie;
     }
 
     public Movie updateMovie(Long id, Movie movieDetails) throws ResourceNotFoundException {
@@ -119,5 +133,14 @@ public class MovieService {
         } catch (Exception e) {
             throw new RuntimeException("Error fetching ratings for movie " + movieId + ": " + e.getMessage(), e);
         }
+    }
+
+    public Map<Long, String> getMovieTitlesByIds(List<Long> ids) {
+        List<Object[]> results = movieRepository.findMovieIdAndTitleByIdIn(ids);
+        return results.stream()
+                .collect(Collectors.toMap(
+                        row -> (Long) row[0],    // movieId
+                        row -> (String) row[1]   // title
+                ));
     }
 }

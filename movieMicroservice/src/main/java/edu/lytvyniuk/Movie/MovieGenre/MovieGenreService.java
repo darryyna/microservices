@@ -8,6 +8,7 @@ package edu.lytvyniuk.Movie.MovieGenre;
   @since 28.04.2025 - 13.56
 */
 
+import edu.lytvyniuk.DTOs.GenreDTO;
 import edu.lytvyniuk.Movie.Genre.Genre;
 import edu.lytvyniuk.Movie.Movie;
 import edu.lytvyniuk.Movie.MovieRepository;
@@ -57,11 +58,18 @@ public class MovieGenreService {
                 .orElseThrow(() -> new ResourceNotFoundException("Movie not found with title: " + title));
     }
 
-    public List<MovieGenre> findAllMovieGenresByMovieId(Long movieId) throws ResourceNotFoundException {
-        if (movieRepository.findById(movieId).isEmpty()) {
-            throw new ResourceNotFoundException("Movie not found with id: " + movieId);
-        }
-        return movieGenreRepository.findByMovie_MovieId(movieId);
-    }
+    public void saveAllMovieGenres(Movie movie, List<GenreDTO> genreDTOs) {
+        List<MovieGenre> movieGenres = genreDTOs.stream()
+                .map(dto -> {
+                    Genre genre = new Genre();
+                    genre.setGenreId(dto.getGenreId());
+                    MovieGenre movieGenre = new MovieGenre();
+                    movieGenre.setMovie(movie);
+                    movieGenre.setGenre(genre);
+                    return movieGenre;
+                })
+                .toList();
 
+        movieGenreRepository.saveAll(movieGenres);
+    }
 }

@@ -14,11 +14,15 @@ import edu.lytvyniuk.DTOs.UserDTO;
 import edu.lytvyniuk.customException.DuplicateResourceException;
 import edu.lytvyniuk.customException.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -95,7 +99,7 @@ public class RatingService {
         }
     }
 
-    private String getMovieTitleByMovieId(Long movieId) {
+    public String getMovieTitleByMovieId(Long movieId) {
         String url = movieServiceUrl + "/movies/" + movieId;
         try {
             MovieDTO movieDTO = restTemplate.getForObject(url, MovieDTO.class);
@@ -107,35 +111,61 @@ public class RatingService {
         }
     }
 
-    private RatingDTO mapAndEnrichRatingDTO(Rating rating) {
+    private Map<Long, String> getMovieTitlesByIds(List<Long> movieIds) {
+        String url = movieServiceUrl + "/movies/titles?ids=" +
+                movieIds.stream()
+                        .distinct()
+                        .map(String::valueOf)
+                        .collect(Collectors.joining("&ids="));  // змінилося з коми на окремі параметри
+
+        try {
+            ParameterizedTypeReference<Map<Long, String>> responseType = new ParameterizedTypeReference<>() {};
+            ResponseEntity<Map<Long, String>> response = restTemplate.exchange(url, HttpMethod.GET, null, responseType);
+            return response.getBody();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to fetch movie titles in batch", e);
+        }
+    }
+
+
+    public RatingDTO mapAndEnrichRatingDTO(Rating rating) {
         RatingDTO ratingDTO = ratingMapper.toDTO(rating);
         ratingDTO.setUsername(getUsernameByUserId(rating.getUserId()));
         ratingDTO.setMovieTitle(getMovieTitleByMovieId(rating.getMovieId()));
-
         return ratingDTO;
     }
 
 
     public List<RatingDTO> findAllDTOs() {
         List<Rating> ratings = ratingRepository.findAll();
+
+        Map<Long, String> movieTitles = getMovieTitlesByIds(
+                ratings.stream().map(Rating::getMovieId).distinct().collect(Collectors.toList())
+        );
+
         return ratings.stream()
-                .map(this::mapAndEnrichRatingDTO)
+                .map(rating -> {
+                    RatingDTO dto = ratingMapper.toDTO(rating);
+                    dto.setUsername(getUsernameByUserId(rating.getUserId()));
+                    dto.setMovieTitle(movieTitles.getOrDefault(rating.getMovieId(), "Unknown Movie"));
+                    return dto;
+                })
                 .collect(Collectors.toList());
     }
 
-    public Optional<RatingDTO> findDTOById(Long id) {
-        Optional<Rating> ratingOptional = ratingRepository.findById(id);
-        if (ratingOptional.isPresent()) {
-                       return Optional.of(mapAndEnrichRatingDTO(ratingOptional.get()));
-        } else {
-            return Optional.empty();
-        }
-    }
-
     public List<RatingDTO> findRatingDTOsByMovieId(Long movieId) throws ResourceNotFoundException {
-        List<Rating> ratings = ratingRepository.findByMovieId(movieId);
+        List<Rating> ratings = ratingRepository.findByMovieId(movieId); // або findAll()
+        Map<Long, String> movieTitles = getMovieTitlesByIds(
+                ratings.stream().map(Rating::getMovieId).collect(Collectors.toList())
+        );
+
         return ratings.stream()
-                .map(this::mapAndEnrichRatingDTO)
+                .map(rating -> {
+                    RatingDTO dto = ratingMapper.toDTO(rating);
+                    dto.setUsername(getUsernameByUserId(rating.getUserId()));
+                    dto.setMovieTitle(movieTitles.getOrDefault(rating.getMovieId(), "Unknown Movie"));
+                    return dto;
+                })
                 .collect(Collectors.toList());
     }
 
@@ -162,11 +192,7 @@ public class RatingService {
     }
 
 
-    private Optional<Rating> findById(Long id) {
+    public Optional<Rating> findById(Long id) {
         return ratingRepository.findById(id);
-    }
-
-    private List<Rating> findRatingsByMovieId(Long movieId) {
-        return ratingRepository.findByMovieId(movieId);
     }
 }

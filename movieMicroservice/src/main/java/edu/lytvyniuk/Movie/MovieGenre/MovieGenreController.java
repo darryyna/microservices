@@ -72,7 +72,6 @@ public class MovieGenreController {
     @GetMapping("/movie/{title}")
     public ResponseEntity<MovieGenreDTO> getMovieWithGenresByTitle(@PathVariable(name = "title") String title) throws ResourceNotFoundException {
         Movie movie = movieGenreService.findMovieByTitle(title);
-        // Припускаємо, що findMovieByTitle знаходить фільм і повертає його з ID
         if (movie == null) {
             throw new ResourceNotFoundException("Movie with title " + title + " not found");
         }
@@ -91,7 +90,6 @@ public class MovieGenreController {
             singleGenreDTO.setMovieTitle(movieGenreDTO.getMovieTitle());
             singleGenreDTO.setGenres(List.of(genreDTO));
 
-            // Переконайтесь, що movieGenreMapper.toEntity правильно працює з назвами
             MovieGenre movieGenre = movieGenreMapper.toEntity(singleGenreDTO, movieService, genreService);
             MovieGenre createdMovieGenre = movieGenreService.createMovieGenre(movieGenre);
 

@@ -21,8 +21,4 @@ public class MovieGenreDTO {
     @NotEmpty
     private List<GenreDTO> genres;
 
-    public MovieGenreDTO(String movieTitle, List<GenreDTO> genres) {
-        this.movieTitle = movieTitle;
-        this.genres = genres;
-    }
 }

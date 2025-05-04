@@ -36,15 +36,16 @@ public class RatingController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<RatingDTO> getRatingById(@PathVariable(name = "id") Long id) {
-        Optional<RatingDTO> ratingDTO = ratingService.findDTOById(id);
-
-        if (ratingDTO.isPresent()) {
-            return ResponseEntity.ok(ratingDTO.get());
-        } else {
+    public ResponseEntity<RatingDTO> getRatingById(@PathVariable (name = "id") Long id) {
+        Optional<Rating> ratingOpt = ratingService.findById(id);
+        if (ratingOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
+
+        RatingDTO dto = ratingService.mapAndEnrichRatingDTO(ratingOpt.get());
+        return ResponseEntity.ok(dto);
     }
+
 
     @GetMapping("/movie/{movieId}")
     public ResponseEntity<List<RatingDTO>> getRatingsByMovieId(@PathVariable(name = "movieId") Long movieId) throws ResourceNotFoundException {

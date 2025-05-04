@@ -16,13 +16,4 @@ public class GenreDTO {
     private Long genreId;
     @NotEmpty
     private String name;
-
-    public GenreDTO(Long genreId, String name) {
-        this.genreId = genreId;
-        this.name = name;
-    }
-
-    public GenreDTO(String name) {
-        this.name = name;
-    }
 }

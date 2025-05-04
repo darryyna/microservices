@@ -7,6 +7,8 @@ package edu.lytvyniuk.Movie;
   @version 1.0.0
   @since 28.04.2025 - 13.40
 */
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import edu.lytvyniuk.Movie.MovieGenre.MovieGenre;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -46,7 +48,8 @@ public class Movie {
     @Column(name = "average_rating")
     private Double averageRating;
 
-    @OneToMany(mappedBy = "movie", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "movie", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MovieGenre> movieGenres = new ArrayList<>();
 
 }
+
