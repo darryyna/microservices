@@ -37,8 +37,10 @@ public class MovieService {
     private final RestTemplate restTemplate;
     private final MovieGenreService movieGenreService;
 
-    @Value("${ratings.service.url}")
-    private String ratingsServiceUrl;
+//    @Value("${ratings.service.url}")
+//    private String ratingsServiceUrl;
+
+    private static final String RATING_SERVICE_BASE_URL = "http://rating-api";
 
 
     public MovieService(MovieRepository movieRepository, GenreService genreService, RestTemplate restTemplate, MovieGenreService movieGenreService) {
@@ -119,7 +121,7 @@ public class MovieService {
     }
 
     public List<RatingDTO> getRatingsForMovie(Long movieId) {
-        String url = ratingsServiceUrl + "/ratings/movie/" + movieId;
+        String url = RATING_SERVICE_BASE_URL + "/ratings/movie/" + movieId;
         try {
             ResponseEntity<List<RatingDTO>> response = restTemplate.exchange(
                     url,

@@ -32,11 +32,15 @@ public class RatingService {
     private final RestTemplate restTemplate;
     private final RatingMapper ratingMapper;
 
-    @Value("${user.service.url}")
-    private String userServiceUrl;
+//    @Value("${user.service.url}")
+//    private String userServiceUrl;
+//
+//    @Value("${movie.service.url}")
+//    private String movieServiceUrl;
 
-    @Value("${movie.service.url}")
-    private String movieServiceUrl;
+    private static final String USER_SERVICE_BASE_URL = "http://user-api";
+    private static final String MOVIE_SERVICE_BASE_URL = "http://movie-api";
+
 
     public RatingService(RatingRepository ratingRepository, RestTemplate restTemplate, RatingMapper ratingMapper) {
         this.ratingRepository = ratingRepository;
@@ -49,7 +53,7 @@ public class RatingService {
     }
 
     private Long getUserIdByUsername(String username) throws ResourceNotFoundException {
-        String url = userServiceUrl + "/users/username/" + username;
+        String url = USER_SERVICE_BASE_URL + "/users/username/" + username;
         try {
             try {
                 UserDTO userDTO = restTemplate.getForObject(url, UserDTO.class);
@@ -69,7 +73,7 @@ public class RatingService {
     }
 
     private Long getMovieIdByTitle(String movieTitle) throws ResourceNotFoundException {
-        String url = movieServiceUrl + "/movies/title/" + movieTitle;
+        String url = MOVIE_SERVICE_BASE_URL + "/movies/title/" + movieTitle;
         try {
             try {
                 MovieDTO movieDTO = restTemplate.getForObject(url, MovieDTO.class);
@@ -88,7 +92,7 @@ public class RatingService {
     }
 
     private String getUsernameByUserId(Long userId) {
-        String url = userServiceUrl + "/users/" + userId;
+        String url = MOVIE_SERVICE_BASE_URL + "/users/" + userId;
         try {
             UserDTO userDTO = restTemplate.getForObject(url, UserDTO.class);
             return (userDTO != null && userDTO.getUsername() != null) ? userDTO.getUsername() : "Unknown User";
@@ -100,7 +104,7 @@ public class RatingService {
     }
 
     public String getMovieTitleByMovieId(Long movieId) {
-        String url = movieServiceUrl + "/movies/" + movieId;
+        String url = MOVIE_SERVICE_BASE_URL + "/movies/" + movieId;
         try {
             MovieDTO movieDTO = restTemplate.getForObject(url, MovieDTO.class);
             return (movieDTO != null && movieDTO.getTitle() != null) ? movieDTO.getTitle() : "Unknown Movie";
@@ -112,7 +116,7 @@ public class RatingService {
     }
 
     private Map<Long, String> getMovieTitlesByIds(List<Long> movieIds) {
-        String url = movieServiceUrl + "/movies/titles?ids=" +
+        String url = MOVIE_SERVICE_BASE_URL + "/movies/titles?ids=" +
                 movieIds.stream()
                         .distinct()
                         .map(String::valueOf)

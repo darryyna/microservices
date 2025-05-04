@@ -29,11 +29,15 @@ public class RecommendationService {
     private final RecommendationRepository recommendationRepository;
     private final RestTemplate restTemplate;
 
-    @Value("${user.service.url}")
-    private String userServiceUrl;
+//    @Value("${user.service.url}")
+//    private String userServiceUrl;
+//
+//    @Value("${movie.service.url}")
+//    private String movieServiceUrl;
 
-    @Value("${movie.service.url}")
-    private String movieServiceUrl;
+    private static final String USER_SERVICE_BASE_URL = "http://user-api";
+    private static final String MOVIE_SERVICE_BASE_URL = "http://movie-api";
+
 
     public RecommendationService(RecommendationRepository recommendationRepository, RestTemplate restTemplate) {
         this.recommendationRepository = recommendationRepository;
@@ -41,7 +45,7 @@ public class RecommendationService {
     }
 
     private Long getUserIdByUsername(String username) throws ResourceNotFoundException {
-        String url = userServiceUrl + "/users/username/" + username;
+        String url = USER_SERVICE_BASE_URL + "/users/username/" + username;
         try {
             ResponseEntity<UserDTO> response = restTemplate.getForEntity(url, UserDTO.class);
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null && response.getBody().getUserId() != null) {
@@ -57,7 +61,7 @@ public class RecommendationService {
     }
 
     private Long getMovieIdByTitle(String movieTitle) throws ResourceNotFoundException {
-        String url = movieServiceUrl + "/movies/title/" + movieTitle;
+        String url = MOVIE_SERVICE_BASE_URL + "/movies/title/" + movieTitle;
         try {
             ResponseEntity<List<MovieDTO>> response = restTemplate.exchange(
                     url,
@@ -133,7 +137,7 @@ public class RecommendationService {
     public RecommendationDTO toDTO(Recommendation recommendation) {
         String username;
         try {
-            ResponseEntity<UserDTO> userResponse = restTemplate.getForEntity(userServiceUrl + "/users/" + recommendation.getUserId(), UserDTO.class);
+            ResponseEntity<UserDTO> userResponse = restTemplate.getForEntity(USER_SERVICE_BASE_URL + "/users/" + recommendation.getUserId(), UserDTO.class);
             username = userResponse.getStatusCode().is2xxSuccessful() && userResponse.getBody() != null ? userResponse.getBody().getUsername() : "Unknown User";
         } catch (Exception e) {
             System.err.println("Error fetching username for user id " + recommendation.getUserId() + ": " + e.getMessage());
@@ -142,7 +146,7 @@ public class RecommendationService {
 
         String movieTitle;
         try {
-            ResponseEntity<MovieDTO> movieResponse = restTemplate.getForEntity(movieServiceUrl + "/movies/" + recommendation.getMovieId(), MovieDTO.class);
+            ResponseEntity<MovieDTO> movieResponse = restTemplate.getForEntity(MOVIE_SERVICE_BASE_URL + "/movies/" + recommendation.getMovieId(), MovieDTO.class);
             movieTitle = movieResponse.getStatusCode().is2xxSuccessful() && movieResponse.getBody() != null ? movieResponse.getBody().getTitle() : "Unknown Movie";
         } catch (Exception e) {
             System.err.println("Error fetching movie title for movie id " + recommendation.getMovieId() + ": " + e.getMessage());

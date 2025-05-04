@@ -29,11 +29,14 @@ public class PreferenceService {
     private final PreferenceRepository preferenceRepository;
     private final RestTemplate restTemplate;
 
-    @Value("${user.service.url}")
-    private String userServiceUrl;
+//    @Value("${user.service.url}")
+//    private String userServiceUrl;
+//
+//    @Value("${movie.service.url}")
+//    private String movieServiceUrl;
 
-    @Value("${movie.service.url}")
-    private String movieServiceUrl;
+    private static final String USER_SERVICE_BASE_URL = "http://user-api";
+    private static final String MOVIE_SERVICE_BASE_URL = "http://movie-api";
 
     public PreferenceService(PreferenceRepository preferenceRepository, RestTemplate restTemplate) {
         this.preferenceRepository = preferenceRepository;
@@ -41,7 +44,7 @@ public class PreferenceService {
     }
 
     private Long getUserIdByUsername(String username) throws ResourceNotFoundException {
-        String url = userServiceUrl + "/users/username/" + username;
+        String url = USER_SERVICE_BASE_URL + "/users/username/" + username;
         try {
             ResponseEntity<UserDTO> response = restTemplate.getForEntity(url, UserDTO.class);
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null && response.getBody().getUserId() != null) {
@@ -57,7 +60,7 @@ public class PreferenceService {
     }
 
     private Long getGenreIdByGenreName(String genreName) throws ResourceNotFoundException {
-        String url = movieServiceUrl + "/genres/name/" + genreName;
+        String url = MOVIE_SERVICE_BASE_URL + "/genres/name/" + genreName;
         try {
             ResponseEntity<GenreDTO> response = restTemplate.getForEntity(url, GenreDTO.class);
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null && response.getBody().getGenreId() != null) {
@@ -127,7 +130,7 @@ public class PreferenceService {
     public PreferenceDTO toDTO(Preference preference) {
         String username;
         try {
-            ResponseEntity<UserDTO> userResponse = restTemplate.getForEntity(userServiceUrl + "/users/" + preference.getUserId(), UserDTO.class);
+            ResponseEntity<UserDTO> userResponse = restTemplate.getForEntity(USER_SERVICE_BASE_URL + "/users/" + preference.getUserId(), UserDTO.class);
             username = userResponse.getStatusCode().is2xxSuccessful() && userResponse.getBody() != null ? userResponse.getBody().getUsername() : "Unknown User";
         } catch (Exception e) {
             System.err.println("Error fetching username for user id " + preference.getUserId() + ": " + e.getMessage());
@@ -137,7 +140,7 @@ public class PreferenceService {
         String genreName;
         try {
             ResponseEntity<GenreDTO> genreResponse = restTemplate.getForEntity(
-                    movieServiceUrl + "/genres/" + preference.getGenreId(), GenreDTO.class);
+                    MOVIE_SERVICE_BASE_URL + "/genres/" + preference.getGenreId(), GenreDTO.class);
             genreName = genreResponse.getStatusCode().is2xxSuccessful() && genreResponse.getBody() != null ?
                     genreResponse.getBody().getName() : "Unknown Genre";
         } catch (Exception e) {
