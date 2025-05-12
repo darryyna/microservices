@@ -9,4 +9,4 @@ spring:
           uri: https://github.com/darryyna/microservices
           clone-on-start: true
           default-label: master
-          search-paths: config
+          search-paths: config-server/src/main/resources/config
