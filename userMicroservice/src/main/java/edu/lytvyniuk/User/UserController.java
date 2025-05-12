@@ -12,6 +12,8 @@ import edu.lytvyniuk.DTOs.UserDTO;
 import edu.lytvyniuk.customException.DuplicateResourceException;
 import edu.lytvyniuk.customException.ResourceNotFoundException;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,9 +21,12 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/users")
+@RefreshScope
 public class UserController {
     private final UserService userService;
     private final UserMapper userMapper;
+    @Value("${project.title:Default Project Title}")
+    private String projectTitle;
 
     public UserController(UserService userService, UserMapper userMapper) {
         this.userService = userService;
@@ -31,6 +36,11 @@ public class UserController {
     @GetMapping
     public List<UserDTO> getAllUsers() {
         return userMapper.toDTOList(userService.findAll());
+    }
+
+    @GetMapping("/project-title")
+    public String getProjectTitleFromConfig() {
+        return "Project Title from Config Server: " + projectTitle;
     }
 
     @GetMapping("/{id}")
