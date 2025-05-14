@@ -40,4 +40,4 @@ eureka:
       defaultZone: http://localhost:8761/eureka/
 
 project:
-  title: User Service API
+  title: User Service API TEST

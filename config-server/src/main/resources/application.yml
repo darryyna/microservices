@@ -13,7 +13,3 @@ spring:
           default-label: master
           search-paths: config-server/src/main/resources/config
           force-pull: true
-
-logging:
-  level:
-    org.springframework.cloud.config: DEBUG
