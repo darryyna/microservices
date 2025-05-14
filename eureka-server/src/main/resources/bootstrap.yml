@@ -1,6 +1,16 @@
 spring:
-application:
-  name: application-eureka-server
-cloud:
+  application:
+    name: application-eureka-server
+  cloud:
+    config:
+      uri: http://localhost:8888
+      fail-fast: false
   config:
-    uri: http://localhost:8888
+    import:
+      - optional:configserver:http://localhost:8888
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: refresh, health, info
