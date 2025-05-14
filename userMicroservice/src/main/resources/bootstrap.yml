@@ -4,8 +4,13 @@ spring:
   cloud:
     config:
       uri: http://localhost:8888
-      name: user-api
-      profile: default
+      fail-fast: true
   config:
     import:
       - optional:configserver:http://localhost:8888
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: refresh, health, info
