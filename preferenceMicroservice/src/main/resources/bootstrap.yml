@@ -1,6 +1,6 @@
 spring:
   application:
-    name: preference-api
+    name: application-preference-api
   cloud:
     config:
       uri: http://localhost:8888

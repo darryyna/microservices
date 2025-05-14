@@ -1,6 +1,6 @@
 spring:
   application:
-    name: recommendation-api
+    name: application-recommendation-api
   cloud:
     config:
       uri: http://localhost:8888
