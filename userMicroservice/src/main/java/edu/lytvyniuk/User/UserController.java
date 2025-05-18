@@ -25,8 +25,6 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
     private final UserMapper userMapper;
-    @Value("${project.title:Default Project Title}")
-    private String projectTitle;
 
     public UserController(UserService userService, UserMapper userMapper) {
         this.userService = userService;
@@ -40,7 +38,7 @@ public class UserController {
 
     @GetMapping("/project-title")
     public String getProjectTitleFromConfig() {
-        return "Project Title from Config Server: " + projectTitle;
+        return "Project Title from Config Server: " + userService.getProjectTitle();
     }
 
     @GetMapping("/{id}")

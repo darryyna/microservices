@@ -10,14 +10,22 @@ package edu.lytvyniuk.User;
 
 import edu.lytvyniuk.customException.DuplicateResourceException;
 import edu.lytvyniuk.customException.ResourceNotFoundException;
+import lombok.Getter;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
+@RefreshScope
 @Service
 public class UserService {
     private final UserRepository userRepository;
+
+    @Getter
+    @Value("${project.title:Default Project Title}")
+    private String projectTitle;
 
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
