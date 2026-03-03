@@ -9,33 +9,151 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
 
   kafka:
-    container_name: kafka
-    image: confluentinc/cp-kafka:latest
+    image: confluentinc/cp-kafka:7.5.0
     depends_on:
       - zookeeper
-    ports:
-      - "9092:9092"
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,BROKER://localhost:9999
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,BROKER:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: BROKER
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports:
+      - "9092:9092"
 
   postgres:
     container_name: postgres
-    image: postgres:latest
+    image: postgres:17
     ports:
       - "5432:5432"
-    volumes:
-      - lab1_postgres_data:/var/lib/postgresql/data
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=in3omnia
       - POSTGRES_DB=movie-recommendations-api
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  config-server:
+    build:
+      context: .
+      dockerfile: config-server/Dockerfile
+    container_name: config-server
+    ports:
+      - "8888:8888"
+    environment:
+      - SPRING_PROFILES_ACTIVE=native
+      - SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCH_LOCATIONS=file:///app/config-server/src/main/resources/config
+    volumes:
+      - ./config-server/src/main/resources/config:/app/config-server/src/main/resources/config
+
+  eureka-server:
+    build:
+      context: .
+      dockerfile: eureka-server/Dockerfile
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    depends_on:
+      - config-server
+    environment:
+      - EUREKA_CLIENT_REGISTER_WITH_EUREKA=false
+      - EUREKA_CLIENT_FETCH_REGISTRY=false
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+      - SPRING_APPLICATION_NAME=eureka-server
+
+  user-api:
+    build:
+      context: .
+      dockerfile: userMicroservice/Dockerfile
+    container_name: user-api
+    ports:
+      - "9991:9991"
+    depends_on:
+      - postgres
+      - kafka
+      - config-server
+      - eureka-server
+    environment:
+      - TZ=Europe/Kyiv
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/movie-recommendations-api
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka/
+
+  movie-api:
+    build:
+      context: .
+      dockerfile: movieMicroservice/Dockerfile
+    container_name: movie-api
+    ports:
+      - "9992:9992"
+    depends_on:
+      - postgres
+      - kafka
+      - config-server
+      - eureka-server
+    environment:
+      - TZ=Europe/Kyiv
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/movie-recommendations-api
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka/
+
+  preference-api:
+    build:
+      context: .
+      dockerfile: preferenceMicroservice/Dockerfile
+    container_name: preference-api
+    ports:
+      - "9993:9993"
+    depends_on:
+      - postgres
+      - kafka
+      - config-server
+      - eureka-server
+    environment:
+      - TZ=Europe/Kyiv
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/movie-recommendations-api
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka/
+
+  rating-api:
+    build:
+      context: .
+      dockerfile: ratingMicroservice/Dockerfile
+    container_name: rating-api
+    ports:
+      - "9994:9994"
+    depends_on:
+      - postgres
+      - kafka
+      - config-server
+      - eureka-server
+    environment:
+      - TZ=Europe/Kyiv
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/movie-recommendations-api
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka/
+
+  recommendation-api:
+    build:
+      context: .
+      dockerfile: recommendationMicroservice/Dockerfile
+    container_name: recommendation-api
+    ports:
+      - "9995:9995"
+    depends_on:
+      - postgres
+      - kafka
+      - config-server
+      - eureka-server
+    environment:
+      - TZ=Europe/Kyiv
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/movie-recommendations-api
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka/
 
 volumes:
-  lab1_postgres_data:
-    external: true
-    name: lab1_postgres_data
+  postgres_data:

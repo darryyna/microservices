@@ -6,7 +6,7 @@ spring:
     name: user-api
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/movie-recommendations-api
+    url: jdbc:postgresql://localhost:5432/movie-recommendations-api?options=-c%20TimeZone=UTC
     username: postgres
     password: in3omnia
   jpa:
