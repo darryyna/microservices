@@ -51,12 +51,11 @@ jobs:
           java-version: 17
 
       - name: Build & Run JaCoCo
-        run: mvn clean install -pl userMicroservice,movieMicroservice,ratingMicroservice,preferenceMicroservice,recommendationMicroservice -am -Djacoco.skip=false
+        run: mvn clean install -Djacoco.skip=false
 
-      - name: SonarCloud Scan (services only)
+      - name: SonarCloud Scan
         run: >-
           mvn sonar:sonar
-          -pl userMicroservice,movieMicroservice,ratingMicroservice,preferenceMicroservice,recommendationMicroservice
           -Dsonar.projectKey=darryyna_microservices
           -Dsonar.organization=darryyna
           -Dsonar.host.url=https://sonarcloud.io
