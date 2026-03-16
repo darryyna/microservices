@@ -41,3 +41,10 @@ eureka:
 
 project:
    title: Rating Service API
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info
+

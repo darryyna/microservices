@@ -15,7 +15,10 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:29092,EXTERNAL://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:29092,EXTERNAL://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     ports:
       - "9092:9092"
@@ -32,19 +35,6 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  config-server:
-    build:
-      context: .
-      dockerfile: config-server/Dockerfile
-    container_name: config-server
-    ports:
-      - "8888:8888"
-    environment:
-      - SPRING_PROFILES_ACTIVE=native
-      - SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCH_LOCATIONS=file:///app/config-server/src/main/resources/config
-    volumes:
-      - ./config-server/src/main/resources/config:/app/config-server/src/main/resources/config
-
   eureka-server:
     build:
       context: .
@@ -52,12 +42,9 @@ services:
     container_name: eureka-server
     ports:
       - "8761:8761"
-    depends_on:
-      - config-server
     environment:
       - EUREKA_CLIENT_REGISTER_WITH_EUREKA=false
       - EUREKA_CLIENT_FETCH_REGISTRY=false
-      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
       - SPRING_APPLICATION_NAME=eureka-server
 
   user-api:
@@ -70,13 +57,11 @@ services:
     depends_on:
       - postgres
       - kafka
-      - config-server
       - eureka-server
     environment:
-      - TZ=Europe/Kyiv
+      - TZ=UTC
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/movie-recommendations-api
-      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka/
 
   movie-api:
@@ -89,13 +74,11 @@ services:
     depends_on:
       - postgres
       - kafka
-      - config-server
       - eureka-server
     environment:
-      - TZ=Europe/Kyiv
+      - TZ=UTC
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/movie-recommendations-api
-      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka/
 
   preference-api:
@@ -108,13 +91,11 @@ services:
     depends_on:
       - postgres
       - kafka
-      - config-server
       - eureka-server
     environment:
-      - TZ=Europe/Kyiv
+      - TZ=UTC
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/movie-recommendations-api
-      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka/
 
   rating-api:
@@ -127,13 +108,11 @@ services:
     depends_on:
       - postgres
       - kafka
-      - config-server
       - eureka-server
     environment:
-      - TZ=Europe/Kyiv
+      - TZ=UTC
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/movie-recommendations-api
-      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka/
 
   recommendation-api:
@@ -146,13 +125,11 @@ services:
     depends_on:
       - postgres
       - kafka
-      - config-server
       - eureka-server
     environment:
-      - TZ=Europe/Kyiv
+      - TZ=UTC
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/movie-recommendations-api
-      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka/
 
 volumes:
