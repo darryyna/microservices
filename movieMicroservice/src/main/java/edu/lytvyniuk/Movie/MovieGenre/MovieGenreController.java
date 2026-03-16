@@ -77,6 +77,7 @@ public class MovieGenreController {
         }
         List<Genre> genres = movieGenreService.findGenresByMovieId(movie.getMovieId());
         MovieGenreDTO dto = movieGenreMapper.toDTO(movie, genres);
+        System.out.println("Movie: " + movie.getTitle() + ", Genres: " + genres.stream().map(Genre::getName).toList());
         return ResponseEntity.ok(dto);
     }
 
