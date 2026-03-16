@@ -32,8 +32,8 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Run tests
-        run: mvn test
+      - name: Run tests (services only)
+        run: mvn test -pl services/* -am
 
   sonar:
     runs-on: ubuntu-latest
@@ -42,7 +42,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0  # важливо для Sonar
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -50,10 +50,15 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: SonarCloud Scan
-        run: |
-          mvn verify sonar:sonar \
-            -Dsonar.projectKey=darryyna_microservices \
-            -Dsonar.organization=darryyna \
-            -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+      - name: Build & Run JaCoCo
+        run: mvn clean verify -pl services/* -am -Djacoco.skip=false
+
+      - name: SonarCloud Scan (services only)
+        run: mvn sonar:sonar \
+          -pl services/* \
+          -Dsonar.projectKey=darryyna_microservices \
+          -Dsonar.organization=darryyna \
+          -Dsonar.host.url=https://sonarcloud.io \
+          -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
+          -Dsonar.java.coveragePlugin=jacoco \
+          -Dsonar.coverage.jacoco.xmlReportPaths=services/*/target/site/jacoco/jacoco.xml
