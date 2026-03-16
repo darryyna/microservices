@@ -1,9 +1,9 @@
 server:
-  port: 9994
+  port: 9995
 
 spring:
   application:
-    name: preference-api
+    name: recommendation-api
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/movie-recommendations-api?options=-c%20TimeZone=UTC
@@ -45,6 +45,12 @@ kafka:
   topic:
     name: movie-topic
 
-
 project:
-   title: Preference Service API
+  title: Recommendation Service API
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info
+

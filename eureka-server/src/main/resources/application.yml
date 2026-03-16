@@ -10,3 +10,10 @@ eureka:
 
 project:
    title: Eureka Discovery Server
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info
+

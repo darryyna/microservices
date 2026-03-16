@@ -76,7 +76,6 @@
 
     <modules>
         <module>common-dto</module>
-        <module>config-server</module>
         <module>eureka-server</module>
         <module>userMicroservice</module>
         <module>movieMicroservice</module>
