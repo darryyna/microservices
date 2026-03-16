@@ -51,7 +51,7 @@ jobs:
           java-version: 17
 
       - name: Build & Run JaCoCo
-        run: mvn clean verify -pl userMicroservice,movieMicroservice,ratingMicroservice,preferenceMicroservice,recommendationMicroservice -am -Djacoco.skip=false
+        run: mvn clean install -pl userMicroservice,movieMicroservice,ratingMicroservice,preferenceMicroservice,recommendationMicroservice -am -Djacoco.skip=false
 
       - name: SonarCloud Scan (services only)
         run: >-
