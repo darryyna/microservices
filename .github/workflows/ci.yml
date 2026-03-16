@@ -19,5 +19,18 @@ jobs:
       - name: Compile
         run: mvn clean compile
 
+  test:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
       - name: Run tests
         run: mvn test
