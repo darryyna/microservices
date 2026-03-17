@@ -50,7 +50,7 @@ class PreferenceServiceTest {
 
         assertFalse(preferences.isEmpty());
         assertEquals(1, preferences.size());
-        assertEquals(120, preferences.get(0).getPreferredMaxDuration());
+        assertEquals(150, preferences.get(0).getPreferredMaxDuration());
     }
 
     @Test
