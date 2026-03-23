@@ -19,5 +19,46 @@ jobs:
       - name: Compile
         run: mvn clean compile
 
-      - name: Run tests
-        run: mvn test
+  test:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Run tests (services only)
+        run: mvn test -pl userMicroservice,movieMicroservice,ratingMicroservice,preferenceMicroservice,recommendationMicroservice -am
+
+  sonar:
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Build & Run JaCoCo
+        run: mvn clean install -Djacoco.skip=false
+
+      - name: SonarCloud Scan
+        run: >-
+          mvn sonar:sonar
+          -Dsonar.projectKey=darryyna_microservices
+          -Dsonar.organization=darryyna
+          -Dsonar.host.url=https://sonarcloud.io
+          -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+          -Dsonar.java.coveragePlugin=jacoco
+          -Dsonar.coverage.jacoco.xmlReportPaths=*/target/site/jacoco/jacoco.xml
