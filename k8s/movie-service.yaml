@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: movie-api
+spec:
+  selector:
+    app: movie-api
+  ports:
+    - protocol: TCP
+      port: 9992
+      targetPort: 9992
+  type: ClusterIP

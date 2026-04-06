@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: preference-api
+spec:
+  selector:
+    app: preference-api
+  ports:
+    - port: 9994
+      targetPort: 9994

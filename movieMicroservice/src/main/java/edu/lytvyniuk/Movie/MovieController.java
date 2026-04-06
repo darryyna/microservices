@@ -9,19 +9,14 @@ package edu.lytvyniuk.Movie;
 */
 
 import edu.lytvyniuk.DTOs.GenreDTO;
-import edu.lytvyniuk.DTOs.KafkaMovieTmpl;
 import edu.lytvyniuk.DTOs.MovieDTO;
-import edu.lytvyniuk.DTOs.RatingDTO;
 import edu.lytvyniuk.Movie.Genre.Genre;
 import edu.lytvyniuk.Movie.MovieGenre.MovieGenreService;
 import edu.lytvyniuk.customException.DuplicateResourceException;
 import edu.lytvyniuk.customException.ResourceNotFoundException;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -33,12 +28,6 @@ public class MovieController {
     private final MovieService movieService;
     private final MovieGenreService movieGenreService;
     private final MovieMapper movieMapper;
-
-    @Value("${kafka.topic.name}")
-    private String movieTopic;
-
-    @Autowired
-    private KafkaTemplate<String, Object> kafkaTemplate;
 
     public MovieController(MovieService movieService, MovieGenreService movieGenreService , MovieMapper movieMapper) {
         this.movieService = movieService;
@@ -95,8 +84,6 @@ public class MovieController {
         if (movieOpt.isPresent()) {
             Movie movie = movieOpt.get();
             MovieDTO movieDTO = getMovieDTOWithDetails(movie);
-
-            kafkaTemplate.send(movieTopic, "hello, i`m kafka producer, i`m sending you movie with id " + id);
             return ResponseEntity.ok(movieDTO);
         } else {
             return ResponseEntity.notFound().build();
@@ -134,9 +121,6 @@ public class MovieController {
 
         Movie createdMovie = movieService.save(movie, genreDTOs);
         MovieDTO createdMovieDTO = movieMapper.toDTO(createdMovie);
-
-        kafkaTemplate.send(movieTopic, new KafkaMovieTmpl(createdMovieDTO.getMovieId(), createdMovieDTO.getTitle()));
-
         return ResponseEntity.status(HttpStatus.CREATED).body(createdMovieDTO);
     }
 
@@ -160,8 +144,6 @@ public class MovieController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMovie(@PathVariable(name = "id") Long id) throws ResourceNotFoundException {
         movieService.deleteById(id);
-
-        kafkaTemplate.send(movieTopic, "Oooops, movie with id " + id + " was deleted :(");
         return ResponseEntity.noContent().build();
     }
 }

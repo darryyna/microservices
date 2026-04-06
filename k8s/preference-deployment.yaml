@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: preference-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: preference-api
+  template:
+    metadata:
+      labels:
+        app: preference-api
+    spec:
+      containers:
+        - name: preference-api
+          image: microservices-preference-api:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 9994
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://postgres:5432/movie-recommendations-api
+            - name: SPRING_DATASOURCE_USERNAME
+              value: postgres
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: in3omnia
+            - name: EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE
+              value: http://eureka:8761/eureka/
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 9994
+            initialDelaySeconds: 120
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 9994
+            initialDelaySeconds: 120
+            periodSeconds: 15
+            failureThreshold: 5

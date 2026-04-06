@@ -6,7 +6,7 @@ spring:
     name: user-api
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/movie-recommendations-api?options=-c%20TimeZone=UTC
+    url: jdbc:postgresql://postgres:5432/movie-recommendations-api
     username: postgres
     password: in3omnia
   jpa:
@@ -19,8 +19,6 @@ spring:
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
-  kafka:
-    bootstrap-servers: localhost:9092
 
 springdoc:
   api-docs:
