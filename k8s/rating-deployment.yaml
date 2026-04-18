@@ -12,7 +12,6 @@ spec:
       labels:
         app: rating-api
     spec:
-      # я теж в шоці, все так і має бути
       containers:
         - name: rating-api
           image: microservices-rating-api:latest
@@ -26,8 +25,7 @@ spec:
               value: postgres
             - name: SPRING_DATASOURCE_PASSWORD
               value: in3omnia
-            - name: EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE
-              value: http://eureka:8761/eureka/
+
           readinessProbe:
             httpGet:
               path: /actuator/health

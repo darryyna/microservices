@@ -10,19 +10,6 @@ services:
       - POSTGRES_DB=movie-recommendations-api
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
-  eureka-server:
-    build:
-      context: .
-      dockerfile: eureka-server/Dockerfile
-    container_name: eureka-server
-    ports:
-      - "8761:8761"
-    environment:
-      - EUREKA_CLIENT_REGISTER_WITH_EUREKA=false
-      - EUREKA_CLIENT_FETCH_REGISTRY=false
-      - SPRING_APPLICATION_NAME=eureka-server
-
   user-api:
     build:
       context: .
@@ -32,11 +19,9 @@ services:
       - "9991:9991"
     depends_on:
       - postgres
-      - eureka-server
     environment:
       - TZ=UTC
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/movie-recommendations-api
-      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka/
 
   movie-api:
     build:
@@ -47,11 +32,9 @@ services:
       - "9992:9992"
     depends_on:
       - postgres
-      - eureka-server
     environment:
       - TZ=UTC
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/movie-recommendations-api
-      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka/
 
   preference-api:
     build:
@@ -62,11 +45,9 @@ services:
       - "9994:9994"
     depends_on:
       - postgres
-      - eureka-server
     environment:
       - TZ=UTC
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/movie-recommendations-api
-      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka/
 
   rating-api:
     build:
@@ -77,11 +58,9 @@ services:
       - "9993:9993"
     depends_on:
       - postgres
-      - eureka-server
     environment:
       - TZ=UTC
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/movie-recommendations-api
-      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka/
 
   recommendation-api:
     build:
@@ -92,11 +71,9 @@ services:
       - "9995:9995"
     depends_on:
       - postgres
-      - eureka-server
     environment:
       - TZ=UTC
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/movie-recommendations-api
-      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka/
 
 volumes:
   postgres_data:
