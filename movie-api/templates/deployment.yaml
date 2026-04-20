@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "movie-api.fullname" . }}
+  labels:
+    {{- include "movie-api.labels" . | nindent 4 }}
+
+spec:
+  replicas: {{ .Values.replicaCount }}
+
+  selector:
+    matchLabels:
+      {{- include "movie-api.selectorLabels" . | nindent 6 }}
+
+  template:
+    metadata:
+      labels:
+        {{- include "movie-api.selectorLabels" . | nindent 8 }}
+
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+
+          ports:
+            - containerPort: {{ .Values.containerPort }}
+
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: {{ .Values.env.datasource.url | quote }}
+
+            - name: SPRING_DATASOURCE_USERNAME
+              value: {{ .Values.env.datasource.username | quote }}
+
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: {{ .Values.env.datasource.password | quote }}
+
+            - name: EUREKA_CLIENT_ENABLED
+              value: "false"
+
+            - name: LOGGING_LEVEL_ROOT
+              value: "INFO"
+
+            - name: LOGGING_LEVEL_ORG_SPRINGFRAMEWORK
+              value: "WARN"
+
+            - name: LOGGING_LEVEL_COM_NETFLIX_DISCOVERY
+              value: "OFF"
+
+            - name: LOGGING_LEVEL_COM_ZAXXER_HIKARI
+              value: "WARN"
+
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: {{ .Values.containerPort }}
+            initialDelaySeconds: 60
+            periodSeconds: 10
+
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: {{ .Values.containerPort }}
+            initialDelaySeconds: 90
+            periodSeconds: 15
