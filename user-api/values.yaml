@@ -3,8 +3,7 @@ image:
   tag: latest
   pullPolicy: IfNotPresent
 
-replicaCount: 3
-
+replicaCount: 5
 service:
   type: ClusterIP
   port: 9991
@@ -13,6 +12,6 @@ containerPort: 9991
 
 env:
   datasource:
-    url: jdbc:postgresql://postgres-postgresql:5432/movie-recommendations-api
+    url: jdbc:postgresql://user-api-postgresql:5432/user-api
     username: postgres
-    password: postgres   # ❗ краще потім через secret
+    password: postgres

@@ -25,6 +25,16 @@ spec:
               value: postgres
             - name: SPRING_DATASOURCE_PASSWORD
               value: in3omnia
+            - name: EUREKA_CLIENT_ENABLED
+              value: "false"
+            - name: LOGGING_LEVEL_ROOT
+              value: "INFO"
+            - name: LOGGING_LEVEL_ORG_SPRINGFRAMEWORK
+              value: "WARN"
+            - name: LOGGING_LEVEL_COM_NETFLIX_DISCOVERY
+              value: "OFF"
+            - name: LOGGING_LEVEL_COM_ZAXXER_HIKARI
+              value: "WARN"
           readinessProbe:
             httpGet:
               path: /actuator/health

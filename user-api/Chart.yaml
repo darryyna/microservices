@@ -1,6 +1,6 @@
 apiVersion: v2
-name: movie-api
-description: Movie API Helm chart
+name: user-api
+description: User API Helm chart
 
 type: application
 
